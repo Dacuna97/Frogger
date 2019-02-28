@@ -10,7 +10,7 @@ var Game = new function() {
 
     this.ctx = this.canvas.getContext && this.canvas.getContext('2d');
     if(!this.ctx) { 
-      return alert("Please upgrade your browser to play"); }
+      return alert("Please upgrade your browser to play!!!!!!!"); }
 
     this.setupInput();
 
