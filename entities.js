@@ -3,7 +3,7 @@ var sprites = {
     sx: 0,
     sy: 341,
     w: 34,
-    h: 51,
+    h: 42,
     frames: 7
   },
   background: {
@@ -63,9 +63,10 @@ var PlayerFrog = function () {
 
   this.setup('frog', {
     vx: 0,
+    vy: 0,
     frame: 0,
-    reloadTime: 0.25,
-    maxVel: 200
+    reloadTime: 0.01,
+    maxVel: 50
   });
 
   this.x = Game.width / 2 - this.w / 2;
@@ -76,29 +77,36 @@ var PlayerFrog = function () {
 
   this.step = function (dt) {
     if (Game.keys['left']) {
-      this.vx = -this.maxVel;
+      this.x -= 34;
     } else if (Game.keys['right']) {
-      this.vx = this.maxVel;
+      this.x += 34;
+    } else if (Game.keys['up']) {
+      this.y -= 48;
     } else {
       this.vx = 0;
+      this.vy = 0;
     }
 
     this.x += this.vx * dt;
+    //this.y += this.vy * dt;
 
     if (this.x < 0) {
       this.x = 0;
     } else if (this.x > Game.width - this.w) {
-      this.x = Game.width - this.w
+      this.x = Game.width - this.w;
     }
-
+    if (this.y < 0) {
+      this.y = 0;
+    } else if (this.y > Game.height - this.h) {
+      this.y = Game.height - this.h;
+    }
     this.reload -= dt;
-    /*if(Game.keys['fire'] && this.reload < 0) {
-      Game.keys['fire'] = false;
+    if ((Game.keys['up'] || Game.keys['right'] || Game.keys['left']) && this.reload < 0) {
+      Game.keys['up'] = false;
+      Game.keys['right'] = false;
+      Game.keys['left'] = false;
       this.reload = this.reloadTime;
-
-      this.board.add(new PlayerMissile(this.x,this.y+this.h/2));
-      this.board.add(new PlayerMissile(this.x+this.w,this.y+this.h/2));
-    }*/
+    }
 
   }
 

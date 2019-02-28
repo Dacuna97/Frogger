@@ -28,7 +28,8 @@ var Game = new function () {
   var KEY_CODES = {
     37: 'left',
     39: 'right',
-    32: 'fire'
+    32: 'fire',
+    38: 'up'
   };
 
   this.keys = {};

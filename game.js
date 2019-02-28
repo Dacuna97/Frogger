@@ -1,16 +1,9 @@
 // Especifica lo que se debe pintar al cargar el juego
-var startGame = function () {
-  Game.setBoard(0, new TitleScreen("Frogger",
-    "Press space to start playing",
-    playGame));
-}
+
 
 
 
 var playGame = function () {
-
-  
-
   var board = new GameBoard();
   board.add(new Gamefield());
   board.add(new PlayerFrog());
@@ -39,5 +32,5 @@ var loseGame = function () {
 // y este después de realizar la inicialización llamará a
 // startGame
 window.addEventListener("load", function () {
-  Game.initialize("game", sprites, startGame);
+  Game.initialize("game", sprites, playGame);
 });
