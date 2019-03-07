@@ -13,13 +13,41 @@ var sprites = {
     h: 625,
     frames: 1
   },
-  /*missile: { sx: 0, sy: 42, w: 7, h: 20, frames: 1 },
-  enemy_purple: { sx: 37, sy: 0, w: 42, h: 43, frames: 1 },
-  enemy_bee: { sx: 79, sy: 0, w: 37, h: 43, frames: 1 },
-  enemy_ship: { sx: 116, sy: 0, w: 42, h: 43, frames: 1 },
-  enemy_circle: { sx: 158, sy: 0, w: 32, h: 33, frames: 1 },
-  explosion: { sx: 0, sy: 64, w: 64, h: 64, frames: 12 },*/
-
+  car_blue: {
+    sx: 6,
+    sy: 6,
+    w: 90,
+    h: 50,
+    frames: 1
+  },
+  car_green: {
+    sx: 110,
+    sy: 6,
+    w: 90,
+    h: 50,
+    frames: 1
+  },
+  car_yellow: {
+    sx: 210,
+    sy: 6,
+    w: 100,
+    h: 50,
+    frames: 1
+  },
+  truck_red: {
+    sx: 5,
+    sy: 64,
+    w: 123,
+    h: 43,
+    frames: 1
+  },
+  truck_brown: {
+    sx: 147,
+    sy: 64,
+    w: 200,
+    h: 43,
+    frames: 1
+  }
 };
 
 var OBJECT_PLAYER = 1,
@@ -110,7 +138,11 @@ var PlayerFrog = function () {
       Game.keys['down'] = false;
       this.reload = this.reloadTime;
     }
-
+    var collision = this.board.collide(this, OBJECT_ENEMY);
+    if (collision) {
+      this.board.remove(this);
+      loseGame();
+    }
   }
 
 }
@@ -118,11 +150,6 @@ var PlayerFrog = function () {
 PlayerFrog.prototype = new Sprite();
 PlayerFrog.prototype.type = OBJECT_PLAYER;
 
-PlayerFrog.prototype.hit = function (damage) {
-  if (this.board.remove(this)) {
-    loseGame();
-  }
-}
 
 
 ///// EXPLOSION
@@ -145,95 +172,45 @@ Explosion.prototype.step = function (dt) {
       }
     };
 
-
-
-    /// Player Missile
-
-
-    var PlayerMissile = function (x, y) {
-      this.setup('missile', {
-        vy: -700,
-        damage: 10
-      });
-      this.x = x - this.w / 2;
-      this.y = y - this.h;
-    };
-
-    PlayerMissile.prototype = new Sprite();
-    PlayerMissile.prototype.type = OBJECT_PLAYER_PROJECTILE;
-
-
-    PlayerMissile.prototype.step = function (dt) {
-      this.y += this.vy * dt;
-      if (this.y < -this.h) {
-        this.board.remove(this);
-      }
-
-      var collision = this.board.collide(this, OBJECT_ENEMY);
-      if (collision) {
-        collision.hit(this.damage);
-        this.board.remove(this);
-      } else if (this.y < -this.h) {
-        this.board.remove(this);
-      }
-
-
-    };
-
-
-
     /// ENEMIES
 
     var enemies = {
-      straight: {
-        x: 0,
-        y: -50,
-        sprite: 'enemy_ship',
-        health: 10,
-        E: 100
+      car_blue: {
+        x: -100,
+        row: 7,
+        respawn: 4000,
+        vel: 70,
+        sprite: 'car_blue',
       },
-      ltr: {
-        x: 0,
-        y: -100,
-        sprite: 'enemy_purple',
-        health: 10,
-        B: 200,
-        C: 1,
-        E: 200
+      car_yellow: {
+        x: -100,
+        row: 8,
+        respawn: 4000,
+        vel: 80,
+        sprite: 'car_yellow',
       },
-      circle: {
-        x: 400,
-        y: -50,
-        sprite: 'enemy_circle',
-        health: 10,
-        A: 0,
-        B: -200,
-        C: 1,
-        E: 20,
-        F: 200,
-        G: 1,
-        H: Math.PI / 2
+      car_green: {
+        x: -100,
+        row: 9,
+        respawn: 4000,
+        vel: 90,
+        sprite: 'car_green',
       },
-      wiggle: {
-        x: 100,
-        y: -50,
-        sprite: 'enemy_bee',
-        health: 20,
-        B: 100,
-        C: 4,
-        E: 100
+      truck_red: {
+        x: -200,
+        row: 10,
+        respawn: 6000,
+        vel: 60,
+        sprite: 'truck_red',
       },
-      step: {
-        x: 0,
-        y: -50,
-        sprite: 'enemy_circle',
-        health: 10,
-        B: 300,
-        C: 1.5,
-        E: 60
+      truck_brown: {
+        x: 550,
+        row: 11,
+        respawn: 5000,
+        vel: -50,
+        sprite: 'truck_brown',
       }
     };
-
 
     var Enemy = function (blueprint, override) {
       this.merge(this.baseParameters);
@@ -243,53 +220,58 @@ Explosion.prototype.step = function (dt) {
 
     Enemy.prototype = new Sprite();
     Enemy.prototype.baseParameters = {
-      A: 0,
-      B: 0,
-      C: 0,
-      D: 0,
-      E: 0,
-      F: 0,
-      G: 0,
-      H: 0,
       t: 0,
-      health: 20,
-      damage: 10
+      vx: 50
     };
 
 
     Enemy.prototype.type = OBJECT_ENEMY;
 
     Enemy.prototype.step = function (dt) {
-      this.t += dt;
-      this.vx = this.A + this.B * Math.sin(this.C * this.t + this.D);
-      this.vy = this.E + this.F * Math.sin(this.G * this.t + this.H);
+      this.row_multiplier = Game.height / 13;
+      this.vx = this.vel;
+      this.vy = 0;
       this.x += this.vx * dt;
-      this.y += this.vy * dt;
+      this.y = this.row * this.row_multiplier;
       if (this.y > Game.height ||
-        this.x < -this.w ||
         this.x > Game.width) {
         this.board.remove(this);
       }
-
-      var collision = this.board.collide(this, OBJECT_PLAYER);
-      if (collision) {
-        collision.hit(this.damage);
-        this.board.remove(this);
-      }
-
     }
 
-    Enemy.prototype.hit = function (damage) {
-      this.health -= damage;
-      if (this.health <= 0) {
-        if (this.board.remove(this)) {
-          this.board.add(new Explosion(this.x + this.w / 2,
-            this.y + this.h / 2));
+    var Provider = function () {
+      this.array_cars = [{
+        car_type: enemies.car_blue,
+        time: 4,
+        respawn: 4
+      }, {
+        car_type: enemies.car_green,
+        time: 5,
+        respawn: 6
+      }, {
+        car_type: enemies.car_yellow,
+        time: 5,
+        respawn: 8
+      }, {
+        car_type: enemies.truck_red,
+        time: 8,
+        respawn: 10
+      }, {
+        car_type: enemies.truck_brown,
+        time: 8,
+        respawn: 15
+      }];
+    }
+    Provider.prototype.step = function (dt) {
+      for (let i = 0; i < this.array_cars.length; i++) {
+        this.array_cars[i].time += dt;
+        if (this.array_cars[i].time >= this.array_cars[i].respawn) {
+          this.board.add(new Enemy(this.array_cars[i].car_type));
+          this.array_cars[i].time = 0;
         }
       }
-
-    }
-
+    };
+    Provider.prototype.draw = function () {};
 
 
 
@@ -304,3 +286,16 @@ Explosion.prototype.step = function (dt) {
     }
     Gamefield.prototype = new Sprite();
     Gamefield.prototype.step = function (dt) {};
+
+    // Water
+    var Water = function () {
+      this.x = 0;
+      this.y = 48;
+      this.h = 241;
+      this.w = 550;
+    }
+
+    Water.prototype = new Sprite();
+    Water.prototype.type = OBJECT_ENEMY;
+    Water.prototype.draw = function () {};
+    Water.prototype.step = function () {};

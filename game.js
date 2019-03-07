@@ -6,9 +6,12 @@
 var playGame = function () {
   var board = new GameBoard();
   board.add(new Gamefield());
-  board.add(new PlayerFrog());
-  //board.add(new Level(level1, winGame));
   Game.setBoard(0, board);
+  board = new GameBoard();
+  board.add(new PlayerFrog());
+  board.add(new Provider());
+  board.add(new Water());
+  Game.setBoard(1, board); 
 }
 
 var winGame = function () {
