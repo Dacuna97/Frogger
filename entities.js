@@ -82,6 +82,8 @@ var PlayerFrog = function () {
       this.x += 34;
     } else if (Game.keys['up']) {
       this.y -= 48;
+    } else if (Game.keys['down']) {
+      this.y += 48;
     } else {
       this.vx = 0;
       this.vy = 0;
@@ -101,10 +103,11 @@ var PlayerFrog = function () {
       this.y = Game.height - this.h;
     }
     this.reload -= dt;
-    if ((Game.keys['up'] || Game.keys['right'] || Game.keys['left']) && this.reload < 0) {
+    if ((Game.keys['up'] || Game.keys['right'] || Game.keys['left'] || Game.keys['down']) && this.reload < 0) {
       Game.keys['up'] = false;
       Game.keys['right'] = false;
       Game.keys['left'] = false;
+      Game.keys['down'] = false;
       this.reload = this.reloadTime;
     }
 

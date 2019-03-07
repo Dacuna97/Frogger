@@ -29,7 +29,8 @@ var Game = new function () {
     37: 'left',
     39: 'right',
     32: 'fire',
-    38: 'up'
+    38: 'up',
+    40: 'down'
   };
 
   this.keys = {};
