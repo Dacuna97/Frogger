@@ -47,11 +47,40 @@ var sprites = {
     w: 200,
     h: 43,
     frames: 1
+  },
+  Trunk_M: {
+    sx: 5,
+    sy: 120,
+    w: 198,
+    h: 43,
+    frames: 1
+  },
+  Trunk_B: {
+    sx: 5,
+    sy: 170,
+    w: 253,
+    h: 43,
+    frames: 1
+  },
+  Trunk_S: {
+    sx: 270,
+    sy: 170,
+    w: 130,
+    h: 43,
+    frames: 1
+  },
+  Turtle: {
+    sx: 0,
+    sy: 287,
+    w: 56,
+    h: 48,
+    frames: 1
   }
+  
 };
 
 var OBJECT_PLAYER = 1,
-  OBJECT_PLAYER_PROJECTILE = 2,
+  OBJECT_FRIENDLY = 2,
   OBJECT_ENEMY = 4,
   OBJECT_ENEMY_PROJECTILE = 8,
   OBJECT_POWERUP = 16;
@@ -117,7 +146,6 @@ var PlayerFrog = function () {
       this.vy = 0;
     }
 
-    this.x += this.vx * dt;
     //this.y += this.vy * dt;
 
     if (this.x < 0) {
@@ -139,11 +167,17 @@ var PlayerFrog = function () {
       this.reload = this.reloadTime;
     }
     var collision = this.board.collide(this, OBJECT_ENEMY);
-    if (collision) {
+    var safe = this.board.collide(this, OBJECT_FRIENDLY);
+    if (collision && !safe) {
       this.board.remove(this);
       loseGame();
     }
+    if (safe) {
+      this.vx = safe.vx;
+    }
+    this.x += this.vx * dt;
   }
+
 
 }
 
@@ -238,7 +272,71 @@ Explosion.prototype.step = function (dt) {
         this.board.remove(this);
       }
     }
+    //**************************************************************************** */
+    /// FRIENDLY
 
+    var friendly = {
+      Trunk_M: {
+        x: 550,
+        row: 5,
+        vel: -60,
+        sprite: 'Trunk_M',
+      },
+      Trunk_B: {
+        x: 550,
+        row: 3,
+        vel: -50,
+        sprite: 'Trunk_B',
+      },
+      Trunk_S: {
+        x: 550,
+        row: 1,
+        vel: -70,
+        sprite: 'Trunk_S',
+      },
+      Turtle_F: {
+        x: -200,
+        row: 2,
+        vel: 60,
+        sprite: 'Turtle',
+      },
+      Turtle_L: {
+        x: -200,
+        row: 4,
+        vel: 50,
+        sprite: 'Turtle',
+      }
+
+    };
+
+    var Friendly = function (blueprint, override) {
+      this.merge(this.baseParameters);
+      this.setup(blueprint.sprite, blueprint);
+      this.merge(override);
+    }
+
+    Friendly.prototype = new Sprite();
+    Friendly.prototype.baseParameters = {
+      t: 0,
+      vx: 50
+    };
+
+
+    Friendly.prototype.type = OBJECT_FRIENDLY
+
+    Friendly.prototype.step = function (dt) {
+      this.row_multiplier = Game.height / 13;
+      this.vx = this.vel;
+      this.vy = 0;
+      this.x += this.vx * dt;
+      this.y = this.row * this.row_multiplier;
+      if (this.y > Game.height ||
+        this.x > Game.width) {
+        this.board.remove(this);
+      }
+    }
+
+    //********************************************************************************* */
     var Provider = function () {
       this.array_cars = [{
         car_type: enemies.car_blue,
@@ -260,6 +358,33 @@ Explosion.prototype.step = function (dt) {
         car_type: enemies.truck_brown,
         time: 8,
         respawn: 15
+      }]; 
+
+
+      this.array_friendly = [{
+        friendly_type: friendly.Trunk_M,
+        time: 3,
+        respawn: 5
+      },
+      {
+        friendly_type: friendly.Trunk_B,
+        time: 6,
+        respawn: 10
+      },
+      {
+        friendly_type: friendly.Trunk_S,
+        time: 4,
+        respawn: 4
+      },
+      {
+        friendly_type: friendly.Turtle_F,
+        time: 4,
+        respawn: 4
+      },
+      {
+        friendly_type: friendly.Turtle_L,
+        time: 4,
+        respawn: 4
       }];
     }
     Provider.prototype.step = function (dt) {
@@ -270,6 +395,16 @@ Explosion.prototype.step = function (dt) {
           this.array_cars[i].time = 0;
         }
       }
+
+      for (let i = 0; i < this.array_friendly.length; i++) {
+        this.array_friendly[i].time += dt;
+        if (this.array_friendly[i].time >= this.array_friendly[i].respawn) {
+          this.board.add(new Friendly(this.array_friendly[i].friendly_type));
+          this.array_friendly[i].time = 0;
+        }
+      }
+
+
     };
     Provider.prototype.draw = function () {};
 
@@ -290,7 +425,7 @@ Explosion.prototype.step = function (dt) {
     // Water
     var Water = function () {
       this.x = 0;
-      this.y = 48;
+      this.y = 50;
       this.h = 241;
       this.w = 550;
     }
