@@ -11,6 +11,7 @@ var playGame = function () {
   board.add(new PlayerFrog());
   board.add(new Provider());
   board.add(new Water());
+  board.add(new Home());
   Game.setBoard(1, board); 
   Game.setBoard(3, new TitleScreen('',''));
 }
