@@ -12,6 +12,7 @@ var playGame = function () {
   board.add(new Provider());
   board.add(new Water());
   Game.setBoard(1, board); 
+  Game.setBoard(3, new TitleScreen('',''));
 }
 
 var winGame = function () {
