@@ -2,9 +2,9 @@ var sprites = {
   frog: {
     sx: 0,
     sy: 341,
-    w: 37,
-    h: 50,
-    frames: 7
+    w: 40,
+    h: 40,
+    frames: 3
   },
   background: {
     sx: 420,
@@ -130,26 +130,41 @@ var PlayerFrog = function () {
   this.y = Game.height - this.h;
   this.subFrame = 0;
   this.reload = this.reloadTime;
-
+  this.mov = '';
+  this.dy = this.y;
 
   this.step = function (dt) {
-    if (Game.keys['left']) {
-      this.x -= 34;
-      this.frame++;
-    } else if (Game.keys['right']) {
-      this.frame++;
-      this.x += 34;
-    } else if (Game.keys['up']) {
-      this.frame++;
-      this.y -= 48;
-    } else if (Game.keys['down']) {
-      this.frame++;
-      this.y += 48;
-    } else {
-      this.vx = 0;
+
+    if (this.y == this.dy) {
+
+      if (Game.keys['left']) {
+        this.x -= 34;
+      } else if (Game.keys['right']) {
+        this.x += 34;
+      } else if (Game.keys['up']) {
+        this.vy -= 30;
+        this.dy = this.y - 48;
+        this.mov = 'up';
+      } else if (Game.keys['down']) {
+        this.y += 48;
+      } else {
+        this.vx = 0;
+        this.vy = 0;
+      }
+    }
+
+    this.y += this.vy * dt;
+    if (this.mov == 'up' && this.y < this.dy) {
+      this.y = this.dy;
       this.vy = 0;
     }
-    if(this.frame > 7){
+
+    if (this.vy !== 0 ) {
+      this.frame = Math.floor(this.subFrame++/ 5);
+    } else {
+      if(this.subframe >= 35){
+        this.subFrame = 0;
+      }
       this.frame = 0;
     }
     if (this.x < 0) {
