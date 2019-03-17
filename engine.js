@@ -161,6 +161,7 @@ var SpriteSheet = new function () {
       s.w, s.h,
       x, y,
       s.w, s.h);
+  
   };
 }
 

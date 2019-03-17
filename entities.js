@@ -75,6 +75,13 @@ var sprites = {
     w: 56,
     h: 48,
     frames: 1
+  },
+  death: {
+    sx: 210,
+    sy: 127,
+    w: 45,
+    h: 36,
+    frames: 1
   }
 
 };
@@ -163,6 +170,8 @@ var PlayerFrog = function () {
         } else {
           if (collision && !safe) {
             this.board.remove(this);
+            this.board.add(new Death(this.x + this.w/2, 
+              this.y + this.h/2));
             loseGame();
           }
           if (safe) {
@@ -456,3 +465,16 @@ var PlayerFrog = function () {
     Home.prototype.type = OBJECT_WIN;
     Home.prototype.draw = function () {};
     Home.prototype.step = function () {};
+
+
+    //Death
+
+    var Death = function (centerX, centerY) {
+      this.setup('death', {
+        frame: 0,
+      });
+      this.x = centerX - this.w / 2;
+      this.y = centerY - this.h / 2;
+    }
+    Death.prototype = new Sprite();
+    Death.prototype.step = function () {};
