@@ -14,11 +14,22 @@ var playGame = function () {
   board.add(new Home());
   Game.setBoard(1, board); 
   Game.setBoard(3, new TitleScreen('',''));
+  Game.setBoard(4, new TitleScreen('',''));
 }
 
 var winGame = function () {
   Game.setBoard(3, new TitleScreen("You win!",
     "Press fire to play again",
+    playGame));
+
+};
+var startGame = function () {
+  var board = new GameBoard()
+  board.add(new Init());
+  board.add(new Gamefield());
+  Game.setBoard(3, board);
+  Game.setBoard(4, new TitleScreen("Welcome!",
+    "Press fire to play ",
     playGame));
 
 };
@@ -37,5 +48,5 @@ var loseGame = function () {
 // y este después de realizar la inicialización llamará a
 // startGame
 window.addEventListener("load", function () {
-  Game.initialize("game", sprites, playGame);
+  Game.initialize("game", sprites, startGame);
 });

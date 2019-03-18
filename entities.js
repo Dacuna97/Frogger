@@ -82,6 +82,13 @@ var sprites = {
     w: 45,
     h: 36,
     frames: 1
+  },
+  Ini: {
+    sx: 0,
+    sy: 390,
+    w: 300,
+    h: 300,
+    frames: 1
   }
 
 };
@@ -139,15 +146,31 @@ var PlayerFrog = function () {
     this.reload = this.reloadTime;
     this.mov = '';
     this.dy = this.y;
-
+    this.dx = this.x;
     this.step = function (dt) {
+    var safe = this.board.collide(this, OBJECT_FRIENDLY);
+    
+    if(safe && this.mov!='left' && this.mov!='right')
+      this.dx=this.x;
+    //else{
+    //  if(this.mov!='left' && this.mov!='right')
+     // this.vx=0;
+   // }
+    if(this.mov!='left' && this.mov!='right')
+    this.dx=this.x;
+   
 
-      if (this.y == this.dy) {
 
-        if (Game.keys['left']) {
-          this.x -= 34;
-        } else if (Game.keys['right']) {
-          this.x += 34;
+      if (this.y == this.dy && this.x == this.dx) {
+
+        if (Game.keys['left']&& this.x - 48 >= 0) {
+          this.vx -= 200;
+          this.dx = this.x - 48;
+          this.mov = 'left';
+        } else if (Game.keys['right']&& this.x +this.w+ 48 <= Game.width - this.w) {
+          this.vx += 200;
+          this.dx = this.x + 48;
+          this.mov = 'right';
         } else if (Game.keys['up'] && this.y - 48 >= 0) {
           this.vy -= 200;
           this.dy = this.y - 48;
@@ -157,11 +180,14 @@ var PlayerFrog = function () {
           this.dy = this.y + 48;
           this.mov = 'down';
         } else {
-          this.vx = 0;
+          if(safe)
+            this.vx =safe.vx;
+          else
+            this.vx = 0;
           this.vy = 0;
         }
         var collision = this.board.collide(this, OBJECT_ENEMY);
-        var safe = this.board.collide(this, OBJECT_FRIENDLY);
+        //var safe = this.board.collide(this, OBJECT_FRIENDLY);
         var win = this.board.collide(this, OBJECT_WIN);
 
         if (win) {
@@ -174,7 +200,7 @@ var PlayerFrog = function () {
               this.y + this.h/2));
             loseGame();
           }
-          if (safe) {
+          if ((safe && this.mov!='left' && this.mov!='right')||(safe && this.x == this.dx)) {
             this.vx = safe.vx;
           }
         }
@@ -215,6 +241,33 @@ var PlayerFrog = function () {
         }
 
         this.x += this.vx * dt;
+        if (this.mov == 'left' && this.x < this.dx) {
+          this.mov='';
+          if(safe){
+            this.vx =safe.vx;
+            this.dx =this.x;
+          }
+          else{
+            this.vx = 0;
+            this.x = this.dx;}
+          this.subFrame = 0;
+          this.frame = 0;
+        }
+        if (this.mov == 'right' && this.x > this.dx) {
+          this.mov='';
+          if(safe){
+            this.vx =safe.vx;
+            this.dx =this.x;
+          }
+          else{
+            this.vx = 0;
+            this.x = this.dx;}
+          this.subFrame = 0;
+          this.frame = 0;
+        }
+        if ((this.vx !== 0 && !safe)||(safe && this.x != this.dx &&(this.mov =='left'|| this.mov=='right'))) {
+          this.frame = Math.floor(this.subFrame++/ 7);
+          }
       }
 
     }
@@ -439,6 +492,18 @@ var PlayerFrog = function () {
     }
     Gamefield.prototype = new Sprite();
     Gamefield.prototype.step = function (dt) {};
+
+    
+    var Init = function () {
+      this.setup('Ini', {
+        x:  Game.width / 4,
+        y: 80
+      });
+    }
+    Init.prototype = new Sprite();
+    Init.prototype.step = function (dt) {};
+
+
 
     // Water
     var Water = function () {
