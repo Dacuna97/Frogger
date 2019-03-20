@@ -178,26 +178,45 @@ var PlayerFrog = function () {
     }
 
     this.checkMovementY = function (safe, dt) {
-        this.y += this.vy * dt;
-        //Check if the frog has finished it´s movement in y
-        if (this.mov == 'up' && this.y < this.dy) {
-          this.y = this.dy;
-          this.vy = 0;
-          this.subFrame = 0;
-          this.frame = 0;
-        }
-        if (this.mov == 'down' && this.y > this.dy) {
-          this.y = this.dy;
-          this.vy = 0;
-          this.subFrame = 0;
-          this.frame = 0;
-        }
+      this.y += this.vy * dt;
+      //Check if the frog has finished it´s movement in y
+      if (this.mov == 'up' && this.y < this.dy) {
+        this.y = this.dy;
+        this.vy = 0;
+        this.subFrame = 0;
+        this.frame = 0;
+      }
+      if (this.mov == 'down' && this.y > this.dy) {
+        this.y = this.dy;
+        this.vy = 0;
+        this.subFrame = 0;
+        this.frame = 0;
+      }
+
+    }
+    this.checkMovementX = function (safe, dt) {
+        this.x += this.vx * dt;
         if (this.vy !== 0) {
           this.frame = Math.floor(this.subFrame++/ 7);
           }
-          this.x += this.vx * dt;
           //When the frog finishes the jump to the left
           if (this.mov == 'left' && this.x < this.dx) {
+            this.mov = '';
+            //If the frog is safe, whether it is in a trunk or turtle
+            if (safe) {
+              //The speed becomes the speed of the trunk or turtle
+              //The position becomes the destiny
+              this.vx = safe.vx;
+              this.x = this.dx;
+            } else {
+              this.vx = 0;
+              this.x = this.dx;
+            }
+            this.subFrame = 0;
+            this.frame = 0;
+          }
+          //When the frog finishes the jump to the right
+          if (this.mov == 'right' && this.x > this.dx) {
             this.mov = '';
             //If the frog is safe, whether it is in a trunk or turtle
             if (safe) {
@@ -236,7 +255,6 @@ var PlayerFrog = function () {
             this.board.remove(this);
             winGame();
           } else {
-
             //Check if it´s dead
             if ((collision && !safe) || (this.x < 0 || this.x > Game.width - this.w)) {
               this.board.remove(this);
@@ -251,24 +269,7 @@ var PlayerFrog = function () {
           }
 
           this.checkMovementY(safe, dt);
-
-          //When the frog finishes the jump to the right
-          if (this.mov == 'right' && this.x > this.dx) {
-            this.mov = '';
-            //If the frog is safe, whether it is in a trunk or turtle
-            if (safe) {
-              //The speed becomes the speed of the trunk or turtle
-              //The position becomes the destiny
-              this.vx = safe.vx;
-              this.x = this.dx;
-            } else {
-              this.vx = 0;
-              this.x = this.dx;
-            }
-            this.subFrame = 0;
-            this.frame = 0;
-          }
-
+          this.checkMovementX(safe, dt);
 
           this.reload -= dt;
           if ((Game.keys['up'] || Game.keys['right'] || Game.keys['left'] || Game.keys['down']) && this.reload < 0) {
