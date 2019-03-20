@@ -249,8 +249,6 @@ var PlayerFrog = function () {
             //Check if the frog reached the end
             var win = this.board.collide(this, OBJECT_WIN);
           }
-
-
           if (win) {
             this.board.remove(this);
             winGame();
