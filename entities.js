@@ -147,6 +147,7 @@ var PlayerFrog = function () {
     this.mov = '';
     this.dy = this.y;
     this.dx = this.x;
+    this.angle = 0;
 
     this.movement = function (safe) {
       //All the conditions to move the frog with it´s animation only the distance of a row or column
@@ -154,18 +155,22 @@ var PlayerFrog = function () {
         this.vx -= 200;
         this.dx = this.x - this.w;
         this.mov = 'left';
+        this.angle = -90;
       } else if (Game.keys['right'] && this.x + this.w <= Game.width - this.w) {
         this.vx += 200;
         this.dx = this.x + this.w;
         this.mov = 'right';
+        this.angle = 90;
       } else if (Game.keys['up'] && this.y - 48 >= 0) {
         this.vy -= 200;
         this.dy = this.y - 48;
         this.mov = 'up';
+        this.angle = 0;
       } else if (Game.keys['down'] && this.y + 48 <= Game.height - this.h) {
         this.vy += 200;
         this.dy = this.y + 48;
         this.mov = 'down';
+        this.angle = 180;
       } else {
         //Check if I jumped to another friendly or to the ground
         if (safe)
@@ -286,6 +291,21 @@ var PlayerFrog = function () {
         }
         PlayerFrog.prototype = new Sprite();
         PlayerFrog.prototype.type = OBJECT_PLAYER;
+        PlayerFrog.prototype.draw = function (ctx) {
+
+          var s = SpriteSheet.map[this.sprite];
+
+          if (!this.frame) this.frame = 0;
+          rotation = this.angle * Math.PI / 180;
+          ctx.save();
+          ctx.translate(this.x + s.w / 2, this.y + s.h / 2);
+          ctx.rotate(rotation);
+          ctx.drawImage(SpriteSheet.image, s.sx + this.frame * s.w,
+            s.sy,
+            s.w, s.h,
+            -s.w / 2, -s.h / 2, s.w, s.h);
+          ctx.restore();
+        };
 
 
         /// ENEMIES
